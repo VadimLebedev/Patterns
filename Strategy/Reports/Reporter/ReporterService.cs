@@ -1,18 +1,30 @@
 ﻿using Strategy.Reports.Common.Interfaces;
 using Strategy.Reports.Email;
+using System.Collections.ObjectModel;
 
 namespace Strategy.Reports.Reporter
 {
     internal class ReporterService
     {
+        private readonly ReadOnlyDictionary<Type, Action<IReportData>> reporters;
+
+        public ReporterService()
+        {
+            reporters = new(new Dictionary<Type, Action<IReportData>>
+                {
+                    { typeof(EmailReportData), ReportToEmail},
+                    { typeof(TextReportData), ReportToText}
+                });
+        }
+
         public void Report(IReportData reportData)
         {
-            if (reportData.GetType() == typeof(EmailReportData))
-                ReportToEmail(reportData);
-            else if (reportData.GetType() == typeof(TextReportData))
-                ReportToText(reportData);
-            else
+            var method = reporters.GetValueOrDefault(reportData.GetType());
+
+            if (method == null)
                 throw new NotSupportedException();
+
+            method.Invoke(reportData);
         }
 
         private void ReportToText(IReportData reportData)

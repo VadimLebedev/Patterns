@@ -9,6 +9,11 @@ namespace Strategy.Reports.Common
             var title = message[..11];
             var body = message[12..];
 
+            return CreateInstance<T>(title, body);
+        }
+
+        private T CreateInstance<T>(string title, string body)
+        {
             var constrInfo = typeof(T).GetConstructor(new[] { typeof(string), typeof(string) });
 
             if (constrInfo == null)
@@ -17,7 +22,6 @@ namespace Strategy.Reports.Common
             T instance = (T)constrInfo.Invoke(new[] { title, body });
 
             return instance;
-
         }
     }
 }
